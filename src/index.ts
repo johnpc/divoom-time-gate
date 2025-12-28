@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { createCanvas } from 'canvas';
+import { createHash } from 'crypto';
 
 const DIVOOM_IP = process.env.DIVOOM_IP;
 const HA_URL = process.env.HOME_ASSISTANT_URL;
@@ -69,10 +70,14 @@ export function generateTextImage(
 }
 
 // Send image to specific screen(s)
-export async function sendImage(imageBuffer: Buffer, screens: number[], picId = 1) {
+export async function sendImage(imageBuffer: Buffer, screens: number[]) {
   const base64 = imageBuffer.toString('base64');
   const lcdArray = [0, 0, 0, 0, 0];
   screens.forEach((s) => (lcdArray[s] = 1));
+
+  // Use MD5 hash of image content as PicID to ensure updates when content changes
+  const hash = createHash('md5').update(imageBuffer).digest('hex');
+  const picId = parseInt(hash.substring(0, 8), 16) % 10000;
 
   return sendCommand({
     Command: 'Draw/SendHttpGif',
@@ -98,10 +103,6 @@ async function main() {
   const entities = await listEntities();
   console.log(`Found ${entities.length} entities`);
 
-  // Use timestamp to generate unique PicIDs each run
-  const basePicId = Math.floor(Date.now() / 100) % 10000;
-  console.log(`Using PicID base: ${basePicId}`);
-
   // Screen 1: Heated Stairs
   const stairs = entities.filter(
     (e: { entity_id: string }) =>
@@ -116,7 +117,7 @@ async function main() {
   const stairsColor = stairsOn === 0 ? '#888888' : stairsOn === 1 ? '#FFA500' : '#FF0000';
   const stairsText = stairsOn === 0 ? 'OFF' : stairsOn === 1 ? '1 ON' : '2 ON';
   const img1 = generateTextImage('STAIRS', stairsText, '', stairsColor);
-  await sendImage(img1, [0], basePicId + 0);
+  await sendImage(img1, [0]);
   console.log('Screen 1 sent');
   await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -134,7 +135,7 @@ async function main() {
   const locksText =
     locksLocked === locks.length ? 'LOCKED' : `${locksLocked}/${locks.length} LOCKED`;
   const img2 = generateTextImage('LOCKS', locksText, '', locksColor);
-  await sendImage(img2, [1], basePicId + 1);
+  await sendImage(img2, [1]);
   console.log('Screen 2 sent');
   await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -150,17 +151,23 @@ async function main() {
     : '';
   const garageColor = garageState === 'closed' ? '#00FF00' : '#FF0000';
   const img3 = generateTextImage('GARAGE', garageState.toUpperCase(), garageTime, garageColor);
-  await sendImage(img3, [2], basePicId + 2);
+  await sendImage(img3, [2]);
   console.log('Screen 3 sent');
   await new Promise((resolve) => setTimeout(resolve, 200));
 
-  // Screen 4: Weather
-  const weather = entities.find((e: { entity_id: string }) => e.entity_id.startsWith('weather.'));
-  console.log('Weather entity:', weather?.entity_id);
-  const temp = weather?.attributes?.temperature || '?';
-  const condition = weather?.state || 'unknown';
-  const img4 = generateTextImage(`${temp}°`, condition.toUpperCase(), '', '#00AAFF');
-  await sendImage(img4, [3], basePicId + 3);
+  // Screen 4: Power Usage
+  const power = entities.find(
+    (e: { entity_id: string }) => e.entity_id === 'sensor.dte_instantaneous_demand'
+  );
+  const energy = entities.find(
+    (e: { entity_id: string }) => e.entity_id === 'sensor.dte_energy_bridge'
+  );
+  console.log('Power entity:', power?.entity_id, power?.state);
+  console.log('Energy entity:', energy?.entity_id, energy?.state);
+  const powerKw = (parseFloat(power?.state || '0') / 1000).toFixed(2);
+  const energyKwh = parseFloat(energy?.state || '0').toFixed(2);
+  const img4 = generateTextImage(`${powerKw} kW`, `${energyKwh} kWh`, '', '#FFAA00');
+  await sendImage(img4, [3]);
   console.log('Screen 4 sent');
   await new Promise((resolve) => setTimeout(resolve, 200));
 
@@ -171,7 +178,7 @@ async function main() {
   );
   const lightsColor = lights.length === 0 ? '#888888' : '#FFFF00';
   const img5 = generateTextImage('LIGHTS', `${lights.length} ON`, '', lightsColor);
-  await sendImage(img5, [4], basePicId + 4);
+  await sendImage(img5, [4]);
   console.log('Screen 5 sent');
 
   console.log('Done!');
