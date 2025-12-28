@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  divoom-time-gate:
+    image: mrorbitman/divoom-time-gate:latest
+    container_name: divoom-time-gate
+    environment:
+      - DIVOOM_IP=${DIVOOM_IP}
+      - HOME_ASSISTANT_URL=${HOME_ASSISTANT_URL}
+      - HOME_ASSISTANT_TOKEN=${HOME_ASSISTANT_TOKEN}
+      - SLEEP_DURATION=${SLEEP_DURATION:-300}
+    restart: unless-stopped
