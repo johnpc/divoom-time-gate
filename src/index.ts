@@ -1,0 +1,180 @@
+import 'dotenv/config';
+import { createCanvas } from 'canvas';
+
+const DIVOOM_IP = process.env.DIVOOM_IP;
+const HA_URL = process.env.HOME_ASSISTANT_URL;
+const HA_TOKEN = process.env.HOME_ASSISTANT_TOKEN;
+
+if (!DIVOOM_IP) {
+  throw new Error('DIVOOM_IP not set in .env file');
+}
+
+if (!HA_URL || !HA_TOKEN) {
+  throw new Error('HOME_ASSISTANT_URL and HOME_ASSISTANT_TOKEN must be set in .env file');
+}
+
+async function sendCommand(command: Record<string, unknown>) {
+  const response = await fetch(`http://${DIVOOM_IP}/post`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(command),
+  });
+  return response.json();
+}
+
+// Home Assistant API
+export async function getEntityState(entityId: string) {
+  const response = await fetch(`${HA_URL}/api/states/${entityId}`, {
+    headers: { Authorization: `Bearer ${HA_TOKEN}` },
+  });
+  return response.json();
+}
+
+export async function listEntities() {
+  const response = await fetch(`${HA_URL}/api/states`, {
+    headers: { Authorization: `Bearer ${HA_TOKEN}` },
+  });
+  return response.json();
+}
+
+// Generate a 64x64 image with text
+export function generateTextImage(
+  line1: string,
+  line2: string,
+  line3 = '',
+  color = '#FFFFFF',
+  bgColor = '#000000'
+) {
+  const canvas = createCanvas(64, 64);
+  const ctx = canvas.getContext('2d');
+
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, 64, 64);
+
+  ctx.fillStyle = color;
+  ctx.font = 'bold 10px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+
+  if (line3) {
+    ctx.fillText(line1, 32, 20);
+    ctx.fillText(line2, 32, 32);
+    ctx.fillText(line3, 32, 44);
+  } else {
+    ctx.fillText(line1, 32, 24);
+    ctx.fillText(line2, 32, 40);
+  }
+
+  return canvas.toBuffer('image/jpeg');
+}
+
+// Send image to specific screen(s)
+export async function sendImage(imageBuffer: Buffer, screens: number[], picId = 1) {
+  const base64 = imageBuffer.toString('base64');
+  const lcdArray = [0, 0, 0, 0, 0];
+  screens.forEach((s) => (lcdArray[s] = 1));
+
+  return sendCommand({
+    Command: 'Draw/SendHttpGif',
+    LcdArray: lcdArray,
+    PicNum: 1,
+    PicOffset: 0,
+    PicID: picId,
+    PicSpeed: 1000,
+    PicWidth: 64,
+    PicData: base64,
+  });
+}
+
+export const setBrightness = (brightness: number) =>
+  sendCommand({ Command: 'Channel/SetBrightness', Brightness: brightness });
+
+async function main() {
+  console.log(`Connecting to Divoom Time Gate at ${DIVOOM_IP}`);
+  console.log(`Connecting to Home Assistant at ${HA_URL}`);
+
+  await setBrightness(100);
+
+  const entities = await listEntities();
+  console.log(`Found ${entities.length} entities`);
+
+  // Use timestamp to generate unique PicIDs each run
+  const basePicId = Math.floor(Date.now() / 100) % 10000;
+  console.log(`Using PicID base: ${basePicId}`);
+
+  // Screen 1: Heated Stairs
+  const stairs = entities.filter(
+    (e: { entity_id: string }) =>
+      e.entity_id === 'switch.smart_plug_3_socket_1' ||
+      e.entity_id === 'switch.heated_stairs_3_socket_1'
+  );
+  console.log(
+    'Stairs entities:',
+    stairs.map((s: { entity_id: string }) => s.entity_id)
+  );
+  const stairsOn = stairs.filter((s: { state: string }) => s.state === 'on').length;
+  const stairsColor = stairsOn === 0 ? '#888888' : stairsOn === 1 ? '#FFA500' : '#FF0000';
+  const stairsText = stairsOn === 0 ? 'OFF' : stairsOn === 1 ? '1 ON' : '2 ON';
+  const img1 = generateTextImage('STAIRS', stairsText, '', stairsColor);
+  await sendImage(img1, [0], basePicId + 0);
+  console.log('Screen 1 sent');
+  await new Promise((resolve) => setTimeout(resolve, 200));
+
+  // Screen 2: Smart Locks (only actual door locks)
+  const locks = entities.filter((e: { entity_id: string }) =>
+    ['lock.back_door', 'lock.front_door'].includes(e.entity_id)
+  );
+  console.log(
+    'Lock entities:',
+    locks.map((l: { entity_id: string; state: string }) => `${l.entity_id}: ${l.state}`)
+  );
+  const locksLocked = locks.filter((l: { state: string }) => l.state === 'locked').length;
+  console.log(`Locks locked: ${locksLocked}/${locks.length}`);
+  const locksColor = locksLocked === locks.length ? '#00FF00' : '#FF0000';
+  const locksText =
+    locksLocked === locks.length ? 'LOCKED' : `${locksLocked}/${locks.length} LOCKED`;
+  const img2 = generateTextImage('LOCKS', locksText, '', locksColor);
+  await sendImage(img2, [1], basePicId + 1);
+  console.log('Screen 2 sent');
+  await new Promise((resolve) => setTimeout(resolve, 200));
+
+  // Screen 3: Garage Door
+  const garage = entities.find((e: { entity_id: string }) => e.entity_id.startsWith('cover.'));
+  console.log('Garage entity:', garage?.entity_id);
+  const garageState = garage?.state || 'unknown';
+  const garageTime = garage?.last_changed
+    ? new Date(garage.last_changed).toLocaleTimeString('en-US', {
+        hour: 'numeric',
+        minute: '2-digit',
+      })
+    : '';
+  const garageColor = garageState === 'closed' ? '#00FF00' : '#FF0000';
+  const img3 = generateTextImage('GARAGE', garageState.toUpperCase(), garageTime, garageColor);
+  await sendImage(img3, [2], basePicId + 2);
+  console.log('Screen 3 sent');
+  await new Promise((resolve) => setTimeout(resolve, 200));
+
+  // Screen 4: Weather
+  const weather = entities.find((e: { entity_id: string }) => e.entity_id.startsWith('weather.'));
+  console.log('Weather entity:', weather?.entity_id);
+  const temp = weather?.attributes?.temperature || '?';
+  const condition = weather?.state || 'unknown';
+  const img4 = generateTextImage(`${temp}°`, condition.toUpperCase(), '', '#00AAFF');
+  await sendImage(img4, [3], basePicId + 3);
+  console.log('Screen 4 sent');
+  await new Promise((resolve) => setTimeout(resolve, 200));
+
+  // Screen 5: Lights On
+  const lights = entities.filter(
+    (e: { entity_id: string; state: string }) =>
+      e.entity_id.startsWith('light.') && e.state === 'on'
+  );
+  const lightsColor = lights.length === 0 ? '#888888' : '#FFFF00';
+  const img5 = generateTextImage('LIGHTS', `${lights.length} ON`, '', lightsColor);
+  await sendImage(img5, [4], basePicId + 4);
+  console.log('Screen 5 sent');
+
+  console.log('Done!');
+}
+
+main();
