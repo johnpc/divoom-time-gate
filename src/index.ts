@@ -75,9 +75,11 @@ export async function sendImage(imageBuffer: Buffer, screens: number[]) {
   const lcdArray = [0, 0, 0, 0, 0];
   screens.forEach((s) => (lcdArray[s] = 1));
 
-  // Use MD5 hash of image content as PicID to ensure updates when content changes
-  const hash = createHash('md5').update(imageBuffer).digest('hex');
+  // Use MD5 hash of image content + screen number to ensure unique PicID per screen
+  const screenId = screens[0]; // Use first screen in array
+  const hash = createHash('md5').update(imageBuffer).update(`screen${screenId}`).digest('hex');
   const picId = parseInt(hash.substring(0, 8), 16) % 10000;
+  console.log(`Screen ${screenId} PicID: ${picId}`);
 
   return sendCommand({
     Command: 'Draw/SendHttpGif',
