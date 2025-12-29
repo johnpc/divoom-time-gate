@@ -75,9 +75,14 @@ export async function sendImage(imageBuffer: Buffer, screens: number[]) {
   const lcdArray = [0, 0, 0, 0, 0];
   screens.forEach((s) => (lcdArray[s] = 1));
 
-  // Use MD5 hash of image content + screen number to ensure unique PicID per screen
+  // Use MD5 hash of image content + screen number + timestamp to force updates
   const screenId = screens[0]; // Use first screen in array
-  const hash = createHash('md5').update(imageBuffer).update(`screen${screenId}`).digest('hex');
+  const timestamp = Math.floor(Date.now() / 1000);
+  const hash = createHash('md5')
+    .update(imageBuffer)
+    .update(`screen${screenId}`)
+    .update(`${timestamp}`)
+    .digest('hex');
   const picId = parseInt(hash.substring(0, 8), 16) % 10000;
   console.log(`Screen ${screenId} PicID: ${picId}`);
 
@@ -101,6 +106,9 @@ async function main() {
   console.log(`Connecting to Home Assistant at ${HA_URL}`);
 
   await setBrightness(100);
+
+  // Reset GIF cache to ensure fresh images
+  await sendCommand({ Command: 'Draw/ResetHttpGifId' });
 
   const entities = await listEntities();
   console.log(`Found ${entities.length} entities`);
