@@ -5,6 +5,7 @@ import { createHash } from 'crypto';
 const DIVOOM_IP = process.env.DIVOOM_IP;
 const HA_URL = process.env.HOME_ASSISTANT_URL;
 const HA_TOKEN = process.env.HOME_ASSISTANT_TOKEN;
+const ELECTRICITY_RATE = parseFloat(process.env.ELECTRICITY_RATE || '0.15'); // $/kWh
 
 if (!DIVOOM_IP) {
   throw new Error('DIVOOM_IP not set in .env file');
@@ -170,14 +171,15 @@ async function main() {
   const power = entities.find(
     (e: { entity_id: string }) => e.entity_id === 'sensor.dte_instantaneous_demand'
   );
-  const energy = entities.find(
-    (e: { entity_id: string }) => e.entity_id === 'sensor.dte_energy_bridge'
+  const monthlyEnergy = entities.find(
+    (e: { entity_id: string }) => e.entity_id === 'sensor.monthly_energy'
   );
   console.log('Power entity:', power?.entity_id, power?.state);
-  console.log('Energy entity:', energy?.entity_id, energy?.state);
+  console.log('Monthly energy entity:', monthlyEnergy?.entity_id, monthlyEnergy?.state);
   const powerKw = (parseFloat(power?.state || '0') / 1000).toFixed(2);
-  const energyKwh = parseFloat(energy?.state || '0').toFixed(2);
-  const img4 = generateTextImage(`${powerKw} kW`, `${energyKwh} kWh`, '', '#FFAA00');
+  const energyKwh = parseFloat(monthlyEnergy?.state || '0').toFixed(2);
+  const costDollars = (parseFloat(monthlyEnergy?.state || '0') * 0.17).toFixed(2);
+  const img4 = generateTextImage(`${powerKw} kW`, `${energyKwh} kWh`, `$${costDollars}`, '#FFAA00');
   await sendImage(img4, [3]);
   console.log('Screen 4 sent');
   await new Promise((resolve) => setTimeout(resolve, 200));
