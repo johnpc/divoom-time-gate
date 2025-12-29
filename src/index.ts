@@ -177,9 +177,11 @@ async function main() {
   console.log('Power entity:', power?.entity_id, power?.state);
   console.log('Monthly energy entity:', monthlyEnergy?.entity_id, monthlyEnergy?.state);
   const powerKw = (parseFloat(power?.state || '0') / 1000).toFixed(2);
-  // Multiply by 1000 to correct for unit conversion issue
-  const energyKwh = (parseFloat(monthlyEnergy?.state || '0') * 1000).toFixed(2);
-  const costDollars = (parseFloat(monthlyEnergy?.state || '0') * 1000 * 0.17).toFixed(2);
+  // Multiply by 60 to correct for unit conversion:
+  // MQTT sends per-minute energy (kWh/min) which gets integrated over time,
+  // creating kWhh (kWh-hours). Multiply by 60 (minutes/hour) to get back to kWh.
+  const energyKwh = (parseFloat(monthlyEnergy?.state || '0') * 60).toFixed(2);
+  const costDollars = (parseFloat(monthlyEnergy?.state || '0') * 60 * 0.17).toFixed(2);
   const img4 = generateTextImage(`${powerKw} kW`, `${energyKwh} kWh`, `$${costDollars}`, '#FFAA00');
   await sendImage(img4, [3]);
   console.log('Screen 4 sent');
