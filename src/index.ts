@@ -157,6 +157,7 @@ async function main() {
     ? new Date(garage.last_changed).toLocaleTimeString('en-US', {
         hour: 'numeric',
         minute: '2-digit',
+        timeZone: 'America/New_York',
       })
     : '';
   const garageColor = garageState === 'closed' ? '#00FF00' : '#FF0000';
