@@ -10,3 +10,14 @@ services:
       - HOME_ASSISTANT_TOKEN=${HOME_ASSISTANT_TOKEN}
       - SLEEP_DURATION=${SLEEP_DURATION:-300}
     restart: unless-stopped
+    network_mode: host
+
+  divoom-dashboard:
+    image: mrorbitman/divoom-time-gate-dashboard:latest
+    container_name: divoom-dashboard
+    ports:
+      - "3000:3000"
+    environment:
+      - HOME_ASSISTANT_URL=${HOME_ASSISTANT_URL}
+      - HOME_ASSISTANT_TOKEN=${HOME_ASSISTANT_TOKEN}
+    restart: unless-stopped
