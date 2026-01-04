@@ -20,12 +20,16 @@ function drawPowerUsage(
   ctx.lineWidth = 2;
   ctx.strokeRect(1, 1, 62, 62);
 
-  // Draw large power text
+  // Draw large power number
   ctx.fillStyle = color;
-  ctx.font = 'bold 16px Arial';
+  ctx.font = 'bold 28px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(`${powerKw} kW`, 32, 24);
+  ctx.fillText(powerKw, 32, 22);
+
+  // Draw small kW unit
+  ctx.font = '10px Arial';
+  ctx.fillText('kW', 32, 36);
 
   // Draw small details below (separate lines)
   ctx.fillStyle = '#FFFFFF';
