@@ -22,7 +22,7 @@ function drawPowerUsage(
 
   // Draw large power text
   ctx.fillStyle = color;
-  ctx.font = 'bold 20px Arial';
+  ctx.font = 'bold 16px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.fillText(`${powerKw} kW`, 32, 24);

@@ -18,9 +18,9 @@ function drawLightBulb(canvas: any, count: number, statusText: string) {
   ctx.strokeStyle = color;
   ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.arc(32, 22, 12, Math.PI, 0, false);
-  ctx.lineTo(38, 34);
-  ctx.lineTo(26, 34);
+  ctx.arc(32, 26, 20, Math.PI, 0, false);
+  ctx.lineTo(44, 46);
+  ctx.lineTo(20, 46);
   ctx.closePath();
   ctx.stroke();
 
@@ -32,17 +32,16 @@ function drawLightBulb(canvas: any, count: number, statusText: string) {
 
   // Draw base (metal screw part)
   ctx.fillStyle = '#AAAAAA';
-  ctx.fillRect(28, 34, 8, 2);
-  ctx.fillRect(28, 37, 8, 2);
-  ctx.fillRect(28, 40, 8, 2);
-  ctx.fillRect(29, 43, 6, 3);
+  ctx.fillRect(28, 46, 8, 2);
+  ctx.fillRect(28, 49, 8, 2);
+  ctx.fillRect(29, 52, 6, 3);
 
   // Draw count inside bulb
-  ctx.fillStyle = color;
-  ctx.font = 'bold 18px Arial';
+  ctx.fillStyle = '#00FFFF';
+  ctx.font = 'bold 28px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText(count.toString(), 32, 22);
+  ctx.fillText(count.toString(), 32, 26);
 
   // Draw status text at bottom
   ctx.fillStyle = '#FFFFFF';
