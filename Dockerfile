@@ -24,9 +24,9 @@ COPY tsconfig.json ./
 # Build TypeScript
 RUN npm run build
 
-# Remove dev dependencies and source files to reduce image size
-RUN rm -rf src tsconfig.json node_modules && \
-    npm ci --only=production
+# Remove source files and reinstall only production dependencies
+RUN rm -rf src tsconfig.json && \
+    npm prune --production
 
 # Create run script
 RUN echo '#!/bin/sh\n\
