@@ -1,5 +1,5 @@
-# Use Node.js base image
-FROM node:20-slim
+# Stage 1: Build
+FROM node:20-slim AS builder
 
 # Install canvas dependencies
 RUN apt-get update && apt-get install -y \
@@ -27,6 +27,25 @@ RUN npm run build
 # Remove source files and reinstall only production dependencies
 RUN rm -rf src tsconfig.json && \
     npm prune --production
+
+# Stage 2: Runtime
+FROM node:20-slim
+
+# Install only runtime libraries (not build tools)
+RUN apt-get update && apt-get install -y \
+    libcairo2 \
+    libpango-1.0-0 \
+    libjpeg62-turbo \
+    libgif7 \
+    librsvg2-2 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy only necessary files from builder
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
 
 # Create run script
 RUN echo '#!/bin/sh\n\
