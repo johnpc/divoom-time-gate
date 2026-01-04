@@ -5,3 +5,4 @@ dist
 dashboard/.next
 dashboard/out
 dashboard/node_modules
+generated/

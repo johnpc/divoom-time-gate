@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "start": "tsx src/index.ts",
+    "preview": "tsx src/index.ts --dry-run",
     "build": "tsc",
     "lint": "eslint src/**/*.ts",
     "format": "prettier --write src/**/*.ts",

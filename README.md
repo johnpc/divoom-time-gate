@@ -53,6 +53,9 @@ docker pull mrorbitman/divoom-time-gate:latest
 ## Development
 
 - `npm start` - Run the script
+- `npm run preview` - Generate images without sending to device (dry-run mode)
 - `npm run build` - Compile TypeScript
 - `npm run lint` - Check for linting errors
 - `npm run format` - Format code with Prettier
+
+Generated images are saved to the `generated/` directory for review.
