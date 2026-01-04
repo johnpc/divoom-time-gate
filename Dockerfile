@@ -36,7 +36,7 @@ ITERATION=0\n\
 while true; do\n\
   ITERATION=$((ITERATION + 1))\n\
   echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Starting iteration ${ITERATION}"\n\
-  npm start || echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Script failed - restarting"\n\
+  node dist/index.js || echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Script failed - restarting"\n\
   echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Sleeping ${SLEEP_DURATION}s"\n\
   sleep ${SLEEP_DURATION}\n\
 done' > /app/run.sh && chmod +x /app/run.sh
