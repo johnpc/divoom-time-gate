@@ -13,12 +13,22 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# Copy only package files first for better layer caching
 COPY package*.json ./
-RUN npm install
+RUN npm ci --only=production
 
-COPY . .
+# Copy source files
+COPY src ./src
+COPY tsconfig.json ./
+
+# Build TypeScript
 RUN npm run build
 
+# Remove dev dependencies and source files to reduce image size
+RUN rm -rf src tsconfig.json node_modules && \
+    npm ci --only=production
+
+# Create run script
 RUN echo '#!/bin/sh\n\
 SLEEP_DURATION=${SLEEP_DURATION:-300}\n\
 echo "Starting update loop with ${SLEEP_DURATION} seconds interval..."\n\
@@ -29,7 +39,6 @@ while true; do\n\
   npm start || echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Script failed - restarting"\n\
   echo "[$(date -u +"%Y-%m-%dT%H:%M:%SZ")] Sleeping ${SLEEP_DURATION}s"\n\
   sleep ${SLEEP_DURATION}\n\
-done' > /app/run.sh
-RUN chmod +x /app/run.sh
+done' > /app/run.sh && chmod +x /app/run.sh
 
 CMD ["/app/run.sh"]
