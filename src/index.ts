@@ -4,7 +4,7 @@ import { generateStairsImage } from './generators/stairs';
 import { generateLocksImage } from './generators/locks';
 import { generateGarageImage } from './generators/garage';
 import { generatePowerImage } from './generators/power';
-import { generateLightsImage } from './generators/lights';
+import { generatePhonesImage } from './generators/phones';
 
 const DIVOOM_IP = process.env.DIVOOM_IP;
 const HA_URL = process.env.HOME_ASSISTANT_URL;
@@ -48,8 +48,8 @@ async function main() {
   console.log('Screen 4 sent');
   await new Promise((resolve) => setTimeout(resolve, 200));
 
-  const img5 = await generateLightsImage(entities);
-  await sendImage(img5, [4], 'lights');
+  const img5 = await generatePhonesImage();
+  await sendImage(img5, [4], 'phones');
   console.log('Screen 5 sent');
 
   console.log('Done!');
