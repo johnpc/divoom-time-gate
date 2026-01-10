@@ -22,7 +22,8 @@ function drawPhoneCount(canvas: any, count: number, statusText: string) {
   // Draw status text at bottom
   ctx.fillStyle = '#FFFFFF';
   ctx.font = '8px Arial';
-  ctx.fillText(statusText, 32, 58);
+  ctx.textAlign = 'center';
+  ctx.fillText(statusText, 32, 56);
 }
 
 export async function generatePhonesImage() {
