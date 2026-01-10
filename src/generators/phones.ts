@@ -12,8 +12,8 @@ function drawPhoneCount(canvas: any, count: number, statusText: string) {
   ctx.lineWidth = 2;
   ctx.strokeRect(1, 1, 62, 62);
 
-  // Draw count in dark blue (matching stairs component)
-  ctx.fillStyle = '#1e40af'; // Dark blue
+  // Draw count in blue-600 (matching stairs button)
+  ctx.fillStyle = '#2563eb'; // Tailwind blue-600
   ctx.font = 'bold 36px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
