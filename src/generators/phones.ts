@@ -7,13 +7,13 @@ function drawPhoneCount(canvas: any, count: number, statusText: string) {
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, 64, 64);
 
-  // Draw yellow ring around edge
-  ctx.strokeStyle = '#FFFF00';
+  // Draw blue ring around edge
+  ctx.strokeStyle = '#0000FF';
   ctx.lineWidth = 2;
   ctx.strokeRect(1, 1, 62, 62);
 
-  // Draw count in pure blue (matching stairs generator)
-  ctx.fillStyle = '#0000FF'; // Pure blue like stairs
+  // Draw count in yellow
+  ctx.fillStyle = '#FFFF00';
   ctx.font = 'bold 36px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
