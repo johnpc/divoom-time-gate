@@ -32,7 +32,7 @@ export async function generatePhonesImage() {
     const response = await fetch(`${HOMIE_URL}/api/phones`);
     const phones = await response.json();
     const connectedCount = phones.filter((p: any) => p.connected).length;
-    const statusText = `${connectedCount} CONNECTED`;
+    const statusText = 'PHONES';
 
     const canvas = createCanvas(64, 64);
     drawPhoneCount(canvas, connectedCount, statusText);
