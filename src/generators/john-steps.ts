@@ -39,7 +39,7 @@ export async function generateJohnStepsImage() {
 
   // Yellow number
   ctx.fillStyle = '#FFFF00';
-  ctx.font = 'bold 24px Arial';
+  ctx.font = 'bold 23.9px Arial';
   ctx.fillText(formatSteps(steps), 32, 40);
 
   // Cyan "steps"

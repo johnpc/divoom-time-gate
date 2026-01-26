@@ -26,24 +26,24 @@ export async function generateEmilyStepsImage() {
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, 64, 64);
 
-  // Pink border
-  ctx.strokeStyle = '#FF69B4';
+  // Green border
+  ctx.strokeStyle = '#00FF00';
   ctx.lineWidth = 2;
   ctx.strokeRect(1, 1, 62, 62);
 
-  // Pink name
-  ctx.fillStyle = '#FF69B4';
+  // Green name
+  ctx.fillStyle = '#00FF00';
   ctx.font = 'bold 14px Arial';
   ctx.textAlign = 'center';
   ctx.fillText('EMILY', 32, 16);
 
-  // Green number
-  ctx.fillStyle = '#00FF00';
-  ctx.font = 'bold 24px Arial';
+  // Pink number
+  ctx.fillStyle = '#FF69B4';
+  ctx.font = 'bold 23.9px Arial';
   ctx.fillText(formatSteps(steps), 32, 40);
 
-  // Pink "steps"
-  ctx.fillStyle = '#FF69B4';
+  // Green "steps"
+  ctx.fillStyle = '#00FF00';
   ctx.font = '10px Arial';
   ctx.fillText('steps', 32, 56);
 
