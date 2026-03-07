@@ -7,6 +7,7 @@ import { generatePowerImage } from './generators/power';
 import { generatePhonesImage } from './generators/phones';
 import { generateJohnStepsImage } from './generators/john-steps';
 import { generateEmilyStepsImage } from './generators/emily-steps';
+import { generateTeslaBatteryImage } from './generators/tesla-battery';
 
 const DIVOOM_IP = process.env.DIVOOM_IP;
 const HA_URL = process.env.HOME_ASSISTANT_URL;
@@ -25,7 +26,7 @@ const screens: Record<number, { name: string; generate: (entities: any[]) => Pro
   1: { name: 'locks', generate: generateLocksImage },
   2: { name: 'garage', generate: generateGarageImage },
   3: { name: 'power', generate: generatePowerImage },
-  4: { name: 'john-steps', generate: () => generateJohnStepsImage() },
+  4: { name: 'tesla-battery', generate: () => generateTeslaBatteryImage() },
 };
 
 // Available but not currently assigned:
