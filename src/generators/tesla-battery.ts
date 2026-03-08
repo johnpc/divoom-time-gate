@@ -20,29 +20,28 @@ export async function generateTeslaBatteryImage(): Promise<Buffer> {
   ctx.fillRect(0, 0, 64, 64);
 
   // Color based on battery level
-  const color = data.battery > 50 ? '#00FF00' : data.battery > 20 ? '#FFFF00' : '#FF0000';
+  const color = '#60A5FA';
 
   // Border
   ctx.strokeStyle = color;
   ctx.lineWidth = 2;
   ctx.strokeRect(1, 1, 62, 62);
 
-  // Tesla label
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = 'bold 12px Arial';
+  // Range number (big)
+  ctx.fillStyle = color;
+  ctx.font = 'bold 32px Arial';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('⚡TESLA⚡', 32, 10);
+  ctx.fillText(`${Math.round(data.range)}`, 32, 20);
 
-  // Battery percentage with %
-  ctx.fillStyle = color;
-  ctx.font = 'bold 24px Arial';
-  ctx.fillText(`${Math.round(data.battery)}%`, 32, 32);
-
-  // Range
+  // "miles" label
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = '9px Arial';
-  ctx.fillText(`${Math.round(data.range)} mi`, 32, 50);
+  ctx.font = '10px Arial';
+  ctx.fillText('miles', 32, 38);
+
+  // Tesla + battery percentage
+  ctx.font = '10px Arial';
+  ctx.fillText(`TESLA: ${Math.round(data.battery)}%`, 32, 54);
 
   // Charging status
   const isCharging = data.charging !== 'disconnected' && data.charging !== 'complete';
