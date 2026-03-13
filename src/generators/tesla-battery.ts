@@ -19,8 +19,9 @@ export async function generateTeslaBatteryImage(): Promise<Buffer> {
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, 64, 64);
 
-  // Color based on battery level
-  const color = '#60A5FA';
+  // Color based on charging state
+  const isCharging = data.charging !== 'disconnected' && data.charging !== 'complete';
+  const color = isCharging ? '#FACC15' : '#60A5FA';
 
   // Border
   ctx.strokeStyle = color;
@@ -42,14 +43,6 @@ export async function generateTeslaBatteryImage(): Promise<Buffer> {
   // Tesla + battery percentage
   ctx.font = '10px Arial';
   ctx.fillText(`TESLA: ${Math.round(data.battery)}%`, 32, 54);
-
-  // Charging status
-  const isCharging = data.charging !== 'disconnected' && data.charging !== 'complete';
-  if (isCharging) {
-    ctx.fillStyle = '#00FF00';
-    ctx.font = '8px Arial';
-    ctx.fillText('charging', 32, 60);
-  }
 
   return canvas.toBuffer('image/jpeg');
 }
