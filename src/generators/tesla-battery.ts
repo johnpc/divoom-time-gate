@@ -19,8 +19,8 @@ export async function generateTeslaBatteryImage(): Promise<Buffer> {
   ctx.fillStyle = '#000000';
   ctx.fillRect(0, 0, 64, 64);
 
-  // Color based on charging state
-  const isCharging = data.charging !== 'disconnected' && data.charging !== 'complete';
+  // Color based on charging state - yellow only when actively charging
+  const isCharging = data.charging === 'charging';
   const color = isCharging ? '#FACC15' : '#60A5FA';
 
   // Border
